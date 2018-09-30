@@ -1,19 +1,9 @@
-import {div, h1} from '@cycle/dom';
+import {model} from './model';
+import {view} from './view';
 
 export function main(sources) {
-  const planet$ = sources.SOCK
-    .map(response => JSON.parse(response.data));
-
-  const planetMonitor = planet =>
-    h1('.css-planet-monitor',
-      planet ? `Obi-Wan currently on ${planet.name}` : ''
-    );
-
-  const vdom$ = planet$.map(planet =>
-    div('.css-root', [
-      planetMonitor(planet)
-    ])
-  );
+  const state$ = model(sources);
+  const vdom$ = view(state$);
 
   return {
     DOM: vdom$,

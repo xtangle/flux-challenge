@@ -1,25 +1,8 @@
 import {makeDOMDriver} from '@cycle/dom';
-import xs from 'xstream';
-import {adapt} from '@cycle/run/lib/adapt';
+import {WebSocketSubject} from 'rxjs/webSocket';
 
 function makeWSDriver(url) {
-  const connection = new WebSocket(url);
-  const source$ = xs.create({
-    start: listener => {
-      connection.onerror = (err) => {
-        listener.error(err);
-      };
-      connection.onmessage = (msg) => {
-        console.log('On planet: ' + msg.data);
-        listener.next(msg);
-      };
-    },
-    stop: () => {
-      connection.close();
-    }
-  });
-
-  return () => adapt(source$);
+  return () => new WebSocketSubject(url);
 }
 
 export const drivers = {
