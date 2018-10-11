@@ -1,27 +1,35 @@
-import * as Immutable from 'immutable';
-import {merge} from 'rxjs';
-import {map, scan, shareReplay} from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { map, scan, shareReplay } from 'rxjs/operators';
 
-const initialState = Immutable.fromJS({
-  planet: {
-    name: ''
-  },
-  rows: [null, null, null, null, null]
-});
+const initialState = {
+  planet: null,
+  rows: [null, null, null, null, null],
+};
 
-function makeUpdate$(sources) {
-  const updatePlanet$ = sources.SOCK.pipe(
-    map((planet) => state => state.set('planet', planet))
+function makeUpdate$(planet$, sithResponse$) {
+  const updateWithPlanet$ = planet$.pipe(
+    map(planet => state => ({ ...state, planet })),
   );
 
-  return merge(updatePlanet$);
+  const updateWithSithResponse$ = sithResponse$.pipe(
+    map(sith => (state) => {
+      const rowToPopulate = state.rows.every(row => row === null)
+        ? Math.floor(state.rows.length / 2)
+        : state.rows.findIndex((row, i) => !row && (
+          (state.rows[i - 1] && state.rows[i - 1].apprentice.id === sith.id)
+          || (state.rows[i + 1] && state.rows[i + 1].master.id === sith.id)
+        ));
+      return { ...state, rows: Object.values({ ...state.rows, [rowToPopulate]: sith }) };
+    }),
+  );
+
+  return merge(updateWithPlanet$, updateWithSithResponse$);
 }
 
-export function model(sources) {
-  const update$ = makeUpdate$(sources);
+export default function model(planet$, sithResponse$) {
+  const update$ = makeUpdate$(planet$, sithResponse$);
   return update$.pipe(
     scan((state, update) => update(state), initialState),
-    map(s => s.toJS()),
-    shareReplay(1)
+    shareReplay(1),
   );
 }

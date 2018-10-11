@@ -1,11 +1,13 @@
-import {makeDOMDriver} from '@cycle/dom';
-import {WebSocketSubject} from 'rxjs/webSocket';
+import { makeDOMDriver } from '@cycle/dom';
+import { makeHTTPDriver } from '@cycle/http';
+import { WebSocketSubject } from 'rxjs/webSocket';
 
 function makeWSDriver(url) {
   return () => new WebSocketSubject(url);
 }
 
-export const drivers = {
+export default {
   DOM: makeDOMDriver('.app-container'),
-  SOCK: makeWSDriver('ws://localhost:4000')
+  HTTP: makeHTTPDriver(),
+  SOCK: makeWSDriver('ws://localhost:4000'),
 };
