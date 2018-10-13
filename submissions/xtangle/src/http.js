@@ -1,15 +1,19 @@
 import { of, identity, merge } from 'rxjs';
 import {
-  distinct, filter, map, mapTo, pluck, switchMap,
+  distinctUntilChanged, filter, map, mapTo, pluck, switchMap,
 } from 'rxjs/operators';
 import { hasMatch } from './util';
 
 const API_PATH = 'http://localhost:3000/dark-jedis';
 
+function idBeingFetched(state) {
+  return state.fetchInfo ? state.fetchInfo.id : null;
+}
+
 export default function http(httpSource$, state$) {
   const sithRequest$ = state$.pipe(
-    distinct(state => state.fetchInfo),
-    filter(state => state.fetchInfo && !hasMatch(state)),
+    distinctUntilChanged((s1, s2) => idBeingFetched(s1) === idBeingFetched(s2)),
+    filter(state => state.fetchInfo && !hasMatch(state.rows, state.planet)),
     map(state => ({
       url: `${API_PATH}/${state.fetchInfo.id}`,
       lazy: true,
@@ -18,7 +22,7 @@ export default function http(httpSource$, state$) {
 
   const sithResponse$ = merge(
     httpSource$.select(),
-    state$.pipe(filter(hasMatch), mapTo(of(null))),
+    state$.pipe(filter(state => hasMatch(state.rows, state.planet)), mapTo(of(null))),
   ).pipe(
     switchMap(identity),
     filter(identity),

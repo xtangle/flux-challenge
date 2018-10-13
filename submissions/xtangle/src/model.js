@@ -1,5 +1,5 @@
 import { merge } from 'rxjs';
-import { map, scan, shareReplay } from 'rxjs/operators';
+import { map, scan, share } from 'rxjs/operators';
 import { hasMatch, outOfBounds, shiftByDelta } from './util';
 
 const NUM_ROWS = 5;
@@ -27,35 +27,36 @@ function getRowToPopulate(rows) {
 function makeUpdate$(planet$, sithResponse$, actions$) {
   const updateWithPlanet$ = planet$.pipe(
     map(planet => (state) => {
-      const newFetchInfo = hasMatch(state) ? getRowToPopulate(state.rows) : state.fetchInfo;
-      return { ...state, planet, fetchInfo: newFetchInfo };
+      const fetchInfo = hasMatch(state.rows, planet) ? null : (state.fetchInfo || getRowToPopulate(state.rows));
+      return { ...state, planet, fetchInfo };
     }),
   );
 
   const updateWithSithResponse$ = sithResponse$.pipe(
     map(sith => (state) => {
-      const newRows = Object.values({ ...state.rows, [state.fetchInfo.position]: sith });
-      return { ...state, rows: newRows, fetchInfo: getRowToPopulate(newRows) };
+      const rows = Object.values({ ...state.rows, [state.fetchInfo.position]: sith });
+      const fetchInfo = hasMatch(rows, state.planet) ? null : getRowToPopulate(rows);
+      return { ...state, rows, fetchInfo };
     }),
   );
 
-  const updateWithActions$ = actions$.scroll$.pipe(
+  const updateWithScrollAction$ = actions$.scroll$.pipe(
     map(delta => (state) => {
-      const newRows = shiftByDelta(state.rows, delta);
-      const newFetchInfo = (state.fetchInfo && !outOfBounds(state.fetchInfo.position + delta, newRows))
+      const rows = shiftByDelta(state.rows, delta);
+      const fetchInfo = (state.fetchInfo && !outOfBounds(state.fetchInfo.position + delta, rows))
         ? { ...state.fetchInfo, position: state.fetchInfo.position + delta }
-        : getRowToPopulate(newRows);
-      return { ...state, rows: newRows, fetchInfo: newFetchInfo };
+        : getRowToPopulate(rows);
+      return { ...state, rows, fetchInfo };
     }),
   );
 
-  return merge(updateWithPlanet$, updateWithSithResponse$, updateWithActions$);
+  return merge(updateWithPlanet$, updateWithSithResponse$, updateWithScrollAction$);
 }
 
 export default function model(planet$, sithResponse$, actions$) {
   const update$ = makeUpdate$(planet$, sithResponse$, actions$);
   return update$.pipe(
     scan((state, update) => update(state), initialState),
-    shareReplay(1),
+    share(),
   );
 }

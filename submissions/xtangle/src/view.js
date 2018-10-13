@@ -1,9 +1,12 @@
-import {
-  button, div, h1, h3, h6, li, section, ul,
-} from '@cycle/dom';
+import { button, div, h1, h3, h6, li, section, ul } from '@cycle/dom';
 import { map } from 'rxjs/operators';
 import {
-  firstSithHasMaster, hasEnoughToScrollUp, hasEnoughScrollDown, hasMatch, isMatch, lastSithHasApprentice,
+  firstSithHasMaster,
+  hasEnoughScrollDown,
+  hasEnoughToScrollUp,
+  hasMatch,
+  isMatch,
+  lastSithHasApprentice,
 } from './util';
 
 function planetMonitor(state) {
@@ -11,17 +14,19 @@ function planetMonitor(state) {
 }
 
 function slots(state) {
-  return ul('.css-slots', state.rows.map(sith => (sith
-    ? li('.css-slot', { style: { color: isMatch(sith, state.planet) ? 'red' : null } }, [
-      h3(sith.name),
-      h6(`Homeworld: ${sith.homeworld.name}`),
-    ])
-    : li('.css-slot'))));
+  return ul('.css-slots', state.rows.map(
+    sith => li('.css-slot', { style: { color: isMatch(sith, state.planet) ? 'red' : null } },
+      sith ? [
+        h3(sith.name),
+        h6(`Homeworld: ${sith.homeworld.name}`),
+      ] : []),
+  ));
 }
 
 function scrollButtons(state) {
-  const canScrollUp = !hasMatch(state) && hasEnoughToScrollUp(state) && firstSithHasMaster(state);
-  const canScrollDown = !hasMatch(state) && hasEnoughScrollDown(state) && lastSithHasApprentice(state);
+  const matched = hasMatch(state.rows, state.planet);
+  const canScrollUp = !matched && hasEnoughToScrollUp(state.rows) && firstSithHasMaster(state.rows);
+  const canScrollDown = !matched && hasEnoughScrollDown(state.rows) && lastSithHasApprentice(state.rows);
   const upBtnStyle = canScrollUp ? '' : '.css-button-disabled';
   const downBtnStyle = canScrollDown ? '' : '.css-button-disabled';
 

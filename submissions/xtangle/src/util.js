@@ -4,8 +4,8 @@ export function isMatch(sith, planet) {
   return sith && sith.homeworld.id === planet.id;
 }
 
-export function hasMatch(state) {
-  return state.rows.some(sith => isMatch(sith, state.planet));
+export function hasMatch(rows, planet) {
+  return rows.some(sith => isMatch(sith, planet));
 }
 
 export function outOfBounds(position, rows) {
@@ -20,22 +20,22 @@ export function shiftByDelta(rows, delta) {
     : rows.slice(amount, rows.length).concat(emptyRows);
 }
 
-export function hasEnoughToScrollUp(state) {
-  return shiftByDelta(state.rows, SCROLL_SIZE).some(s => s);
+export function hasEnoughToScrollUp(rows) {
+  return shiftByDelta(rows, SCROLL_SIZE).some(s => s);
 }
 
-export function hasEnoughScrollDown(state) {
-  return shiftByDelta(state.rows, -SCROLL_SIZE).some(s => s);
+export function hasEnoughScrollDown(rows) {
+  return shiftByDelta(rows, -SCROLL_SIZE).some(s => s);
 }
 
-export function firstSithHasMaster(state) {
-  const valids = state.rows.filter(s => s);
+export function firstSithHasMaster(rows) {
+  const valids = rows.filter(s => s);
   const firstValid = valids[0];
   return firstValid && firstValid.master.id !== null;
 }
 
-export function lastSithHasApprentice(state) {
-  const valids = state.rows.filter(s => s);
+export function lastSithHasApprentice(rows) {
+  const valids = rows.filter(s => s);
   const lastValid = valids[valids.length - 1];
   return lastValid && lastValid.apprentice.id !== null;
 }
