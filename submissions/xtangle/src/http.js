@@ -1,19 +1,28 @@
-import { identity, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { of, identity, merge } from 'rxjs';
+import {
+  distinct, filter, map, mapTo, pluck, switchMap,
+} from 'rxjs/operators';
+import { hasMatch } from './util';
 
 const API_PATH = 'http://localhost:3000/dark-jedis';
-const DARTH_SIDIOUS_ID = 3616;
 
-const initialRequest = {
-  url: `${API_PATH}/${DARTH_SIDIOUS_ID}`,
-};
+export default function http(httpSource$, state$) {
+  const sithRequest$ = state$.pipe(
+    distinct(state => state.fetchInfo),
+    filter(state => state.fetchInfo && !hasMatch(state)),
+    map(state => ({
+      url: `${API_PATH}/${state.fetchInfo.id}`,
+      lazy: true,
+    })),
+  );
 
-export default function http(httpSource$) {
-  const sithRequest$ = of(initialRequest);
-
-  const sithResponse$ = httpSource$.select().pipe(
+  const sithResponse$ = merge(
+    httpSource$.select(),
+    state$.pipe(filter(hasMatch), mapTo(of(null))),
+  ).pipe(
     switchMap(identity),
-    map(response => response.body),
+    filter(identity),
+    pluck('body'),
   );
 
   return { sithRequest$, sithResponse$ };

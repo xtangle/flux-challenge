@@ -1,14 +1,16 @@
-import { ReplaySubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import model from './model';
 import view from './view';
 import http from './http';
+import intent from './intent';
 
 export default function main(sources) {
   const planet$ = sources.SOCK;
-  const proxyState$ = new ReplaySubject(1);
+  const proxyState$ = new Subject();
 
   const { sithRequest$, sithResponse$ } = http(sources.HTTP, proxyState$);
-  const state$ = model(planet$, sithResponse$);
+  const actions$ = intent(sources.DOM);
+  const state$ = model(planet$, sithResponse$, actions$);
   const vdom$ = view(state$);
   state$.subscribe(proxyState$);
 
