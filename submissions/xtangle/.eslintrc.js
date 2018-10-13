@@ -1,6 +1,9 @@
 module.exports = {
   "extends": "airbnb-base",
   "rules": {
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "max-len": ["error", {
+      "code": 120
+    }]
   }
 };

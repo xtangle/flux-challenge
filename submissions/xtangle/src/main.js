@@ -14,6 +14,8 @@ export default function main(sources) {
   const vdom$ = view(state$);
   state$.subscribe(proxyState$);
 
+  state$.subscribe(state => console.log('>>>', state));
+
   return {
     HTTP: sithRequest$,
     DOM: vdom$,
