@@ -8,7 +8,7 @@ const DARTH_SIDIOUS_ID = 3616;
 const initialState = {
   planet: null,
   rows: new Array(NUM_ROWS).fill(null),
-  fetchInfo: {
+  fetching: {
     id: DARTH_SIDIOUS_ID,
     position: Math.floor(NUM_ROWS / 2),
   },
@@ -18,35 +18,35 @@ function getRowToPopulate(rows) {
   const apprentices = rows.map((sith, i) => (sith ? { id: sith.apprentice.id, position: i + 1 } : null));
   const masters = rows.map((sith, i) => (sith ? { id: sith.master.id, position: i - 1 } : null));
   return [...apprentices, ...masters]
-    .filter(fetchInfo => fetchInfo && fetchInfo.id !== null
-      && !outOfBounds(fetchInfo.position, rows)
-      && rows[fetchInfo.position] === null)
+    .filter(fetching => fetching && fetching.id !== null
+      && !outOfBounds(fetching.position, rows)
+      && rows[fetching.position] === null)
     .shift() || null;
 }
 
 function makeUpdate$(planet$, sithResponse$, actions$) {
   const updateWithPlanet$ = planet$.pipe(
     map(planet => (state) => {
-      const fetchInfo = hasMatch(state.rows, planet) ? null : (state.fetchInfo || getRowToPopulate(state.rows));
-      return { ...state, planet, fetchInfo };
+      const fetching = hasMatch(state.rows, planet) ? null : (state.fetching || getRowToPopulate(state.rows));
+      return { ...state, planet, fetching };
     }),
   );
 
   const updateWithSithResponse$ = sithResponse$.pipe(
     map(sith => (state) => {
-      const rows = Object.values({ ...state.rows, [state.fetchInfo.position]: sith });
-      const fetchInfo = hasMatch(rows, state.planet) ? null : getRowToPopulate(rows);
-      return { ...state, rows, fetchInfo };
+      const rows = Object.values({ ...state.rows, [state.fetching.position]: sith });
+      const fetching = hasMatch(rows, state.planet) ? null : getRowToPopulate(rows);
+      return { ...state, rows, fetching };
     }),
   );
 
   const updateWithScrollAction$ = actions$.scroll$.pipe(
     map(delta => (state) => {
       const rows = shiftByDelta(state.rows, delta);
-      const fetchInfo = (state.fetchInfo && !outOfBounds(state.fetchInfo.position + delta, rows))
-        ? { ...state.fetchInfo, position: state.fetchInfo.position + delta }
+      const fetching = (state.fetching && !outOfBounds(state.fetching.position + delta, rows))
+        ? { ...state.fetching, position: state.fetching.position + delta }
         : getRowToPopulate(rows);
-      return { ...state, rows, fetchInfo };
+      return { ...state, rows, fetching };
     }),
   );
 

@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --mode=development --watch",
-    "build:prod": "webpack --mode=production && git add dist/*",
+    "build:prod": "npm run lint && webpack --mode=production && git add dist/*",
     "lint": "eslint src"
   },
   "author": "Jacky Xu",

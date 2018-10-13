@@ -7,15 +7,15 @@ import { hasMatch } from './util';
 const API_PATH = 'http://localhost:3000/dark-jedis';
 
 function idBeingFetched(state) {
-  return state.fetchInfo ? state.fetchInfo.id : null;
+  return state.fetching ? state.fetching.id : null;
 }
 
 export default function http(httpSource$, state$) {
   const sithRequest$ = state$.pipe(
     distinctUntilChanged((s1, s2) => idBeingFetched(s1) === idBeingFetched(s2)),
-    filter(state => state.fetchInfo && !hasMatch(state.rows, state.planet)),
+    filter(state => state.fetching && !hasMatch(state.rows, state.planet)),
     map(state => ({
-      url: `${API_PATH}/${state.fetchInfo.id}`,
+      url: `${API_PATH}/${state.fetching.id}`,
       lazy: true,
     })),
   );
