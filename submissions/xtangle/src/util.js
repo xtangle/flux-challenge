@@ -24,7 +24,7 @@ export function hasEnoughToScrollUp(rows) {
   return shiftByDelta(rows, SCROLL_SIZE).some(s => s);
 }
 
-export function hasEnoughScrollDown(rows) {
+export function hasEnoughToScrollDown(rows) {
   return shiftByDelta(rows, -SCROLL_SIZE).some(s => s);
 }
 

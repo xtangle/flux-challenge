@@ -2,7 +2,7 @@ import { button, div, h1, h3, h6, li, section, ul } from '@cycle/dom';
 import { map } from 'rxjs/operators';
 import {
   firstSithHasMaster,
-  hasEnoughScrollDown,
+  hasEnoughToScrollDown,
   hasEnoughToScrollUp,
   hasMatch,
   isMatch,
@@ -26,7 +26,7 @@ function slots(state) {
 function scrollButtons(state) {
   const matched = hasMatch(state.rows, state.planet);
   const canScrollUp = !matched && hasEnoughToScrollUp(state.rows) && firstSithHasMaster(state.rows);
-  const canScrollDown = !matched && hasEnoughScrollDown(state.rows) && lastSithHasApprentice(state.rows);
+  const canScrollDown = !matched && hasEnoughToScrollDown(state.rows) && lastSithHasApprentice(state.rows);
   const upBtnStyle = canScrollUp ? '' : '.css-button-disabled';
   const downBtnStyle = canScrollDown ? '' : '.css-button-disabled';
 
